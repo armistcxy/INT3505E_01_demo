@@ -15,7 +15,8 @@ def get_book(book_id):
     return jsonify({"id": book.id, "title": book.title, 
                     "author": book.author,
                     "publication_year": book.publication_year,
-                    "genre": book.genre
+                    "genre": book.genre,
+                    "count": book.count 
                     })
 
 @books_bp.route("/", methods=["POST"])
@@ -24,7 +25,8 @@ def add_book():
     book = Book(title=data["title"], 
                 author=data.get("author"),
                 publication_year=data.get("publication_year"), 
-                genre=data.get("genre")
+                genre=data.get("genre"),
+                count=data.get("count")
                 )
     db.session.add(book)
     db.session.commit()
@@ -43,6 +45,9 @@ def update_book(book_id):
     
     if "publication_year" in data and data["publication_year"]:  
         book.publication_year = int(data["publication_year"])
+    
+    if "count" in data and data["count"]:
+        book.count = int(data["count"])
     
     if "genre" in data and data["genre"]:  
         book.genre = data["genre"]

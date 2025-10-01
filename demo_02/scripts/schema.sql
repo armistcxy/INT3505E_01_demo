@@ -2,8 +2,8 @@ CREATE TABLE books (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     author TEXT,
-    is_available BOOLEAN NOT NULL DEFAULT TRUE,
     publication_year INTEGER,
+    count INTEGER,
     genre TEXT
 );
 

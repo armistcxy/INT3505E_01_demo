@@ -8,7 +8,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     author = db.Column(db.String)
-    is_available = db.Column(db.Boolean, default=True)
+    count = db.Column(db.Integer)
     publication_year = db.Column(db.Integer)
     genre = db.Column(db.String)
 
