@@ -5,3 +5,10 @@ Run this command
 docker run -p 8081:8080 -e SWAGGER_JSON=/docs/openapi.yaml -v $(pwd):/docs swaggerapi/swagger-ui
 ```
 
+## Exposing to Internet
+
+Use ngrok:
+
+```bash
+ngrok http 8081
+```
