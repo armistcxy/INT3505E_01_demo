@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Client–Server Demo</title>
+</head>
+
+<body>
+	<h2>Danh sách người dùng</h2>
+	<ul id="user-list"></ul>
+
+	<script>
+		async function loadUsers() {
+			const res = await fetch("http://localhost:8080/users");
+			const data = await res.json();
+			const list = document.getElementById("user-list");
+			data.forEach(u => {
+				const li = document.createElement("li");
+				li.textContent = `${u.id}: ${u.name}`;
+				list.appendChild(li);
+			});
+		}
+		loadUsers();
+	</script>
+</body>
+
+</html>
