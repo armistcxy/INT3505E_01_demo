@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres-n1demo:
+    image: postgres:17-alpine
+    container_name: postgres-n1demo
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ../migrations:/docker-entrypoint-initdb.d
+      - postgres_n1demo_data:/var/lib/postgresql/data
+  
+
+volumes:
+  postgres_n1demo_data:
