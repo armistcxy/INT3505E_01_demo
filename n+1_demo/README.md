@@ -13,4 +13,35 @@ Cách giải quyết cho vấn đề n + 1 query này được trình bày thôn
 
 Endpoint cho cách làm 2 được đặt tại endpoint `/api/v2/users/posts`
 
- 
+### Thử nghiệm benchmark
+
+Sử dụng vegeta để thử nghiệm benchmark xem độ trễ trung bình của 2 cách implement là như nào
+
+(Kịch bản benchmark là 50 request/s trong vòng 5s)
+
+Kết quả thu được:
+
+Cách 1: n+1 queries
+
+Kết quả
+```
+Requests      [total, rate, throughput]         250, 50.20, 50.08
+Duration      [total, attack, wait]             4.992s, 4.98s, 12.402ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  11.049ms, 12.269ms, 12.245ms, 12.931ms, 13.157ms, 13.966ms, 18.744ms
+```
+
+![alt text](image.png)
+
+Cách 2: eager loading
+
+Kết quả
+```
+Requests      [total, rate, throughput]         250, 50.20, 50.18
+Duration      [total, attack, wait]             4.982s, 4.98s, 1.976ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  1.333ms, 2.055ms, 2.019ms, 2.471ms, 2.609ms, 2.809ms, 3.146ms
+```
+
+![alt text](image-1.png)
+
+
+Kết quả trên đã cho thấy cách làm 2 đã giúp p99 latency giảm từ 13ms ở cách 1 xuống còn gần 3ms, cho thấy eager loading là một phương án khả thi giải quyết vấn đề N + 1 query
