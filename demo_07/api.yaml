@@ -1,0 +1,11 @@
+paths:
+  /hello:
+    get:
+      operationId: getHello
+      responses:
+        200:
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: string
