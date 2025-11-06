@@ -4,14 +4,58 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/oapi-codegen/runtime"
 )
+
+// Product defines model for Product.
+type Product struct {
+	Id    *int     `json:"id,omitempty"`
+	Name  *string  `json:"name,omitempty"`
+	Price *float32 `json:"price,omitempty"`
+	Stock *int     `json:"stock,omitempty"`
+}
+
+// ProductCreate defines model for ProductCreate.
+type ProductCreate struct {
+	Name  string  `json:"name"`
+	Price float32 `json:"price"`
+	Stock *int    `json:"stock,omitempty"`
+}
+
+// ProductUpdate defines model for ProductUpdate.
+type ProductUpdate struct {
+	Name  *string  `json:"name,omitempty"`
+	Price *float32 `json:"price,omitempty"`
+	Stock *int     `json:"stock,omitempty"`
+}
+
+// CreateProductJSONRequestBody defines body for CreateProduct for application/json ContentType.
+type CreateProductJSONRequestBody = ProductCreate
+
+// UpdateProductJSONRequestBody defines body for UpdateProduct for application/json ContentType.
+type UpdateProductJSONRequestBody = ProductUpdate
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-
-	// (GET /hello)
-	GetHello(c *gin.Context)
+	// Get all products
+	// (GET /products)
+	ListProducts(c *gin.Context)
+	// Create a new product
+	// (POST /products)
+	CreateProduct(c *gin.Context)
+	// Delete a product by ID
+	// (DELETE /products/{id})
+	DeleteProduct(c *gin.Context, id int)
+	// Get a product by ID
+	// (GET /products/{id})
+	GetProduct(c *gin.Context, id int)
+	// Update a product by ID
+	// (PUT /products/{id})
+	UpdateProduct(c *gin.Context, id int)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -23,8 +67,8 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// GetHello operation middleware
-func (siw *ServerInterfaceWrapper) GetHello(c *gin.Context) {
+// ListProducts operation middleware
+func (siw *ServerInterfaceWrapper) ListProducts(c *gin.Context) {
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -33,7 +77,92 @@ func (siw *ServerInterfaceWrapper) GetHello(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetHello(c)
+	siw.Handler.ListProducts(c)
+}
+
+// CreateProduct operation middleware
+func (siw *ServerInterfaceWrapper) CreateProduct(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.CreateProduct(c)
+}
+
+// DeleteProduct operation middleware
+func (siw *ServerInterfaceWrapper) DeleteProduct(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameter("simple", false, "id", c.Param("id"), &id)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.DeleteProduct(c, id)
+}
+
+// GetProduct operation middleware
+func (siw *ServerInterfaceWrapper) GetProduct(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameter("simple", false, "id", c.Param("id"), &id)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetProduct(c, id)
+}
+
+// UpdateProduct operation middleware
+func (siw *ServerInterfaceWrapper) UpdateProduct(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameter("simple", false, "id", c.Param("id"), &id)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.UpdateProduct(c, id)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -63,5 +192,9 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/hello", wrapper.GetHello)
+	router.GET(options.BaseURL+"/products", wrapper.ListProducts)
+	router.POST(options.BaseURL+"/products", wrapper.CreateProduct)
+	router.DELETE(options.BaseURL+"/products/:id", wrapper.DeleteProduct)
+	router.GET(options.BaseURL+"/products/:id", wrapper.GetProduct)
+	router.PUT(options.BaseURL+"/products/:id", wrapper.UpdateProduct)
 }
