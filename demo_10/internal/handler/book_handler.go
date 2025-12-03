@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -88,6 +90,9 @@ func (h *BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to retrieve books", http.StatusInternalServerError)
 		return
 	}
+
+	randomWaitInterval := time.Duration(rand.Intn(2000)) * time.Millisecond
+	time.Sleep(randomWaitInterval)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(books)
