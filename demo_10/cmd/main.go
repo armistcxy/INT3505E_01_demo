@@ -13,6 +13,7 @@ import (
 	"book-service/internal/repository"
 	"book-service/internal/service"
 	"book-service/pkg/database"
+	"book-service/pkg/middlewares"
 )
 
 func main() {
@@ -60,10 +61,13 @@ func main() {
 	// Setup routes
 	r := mux.NewRouter()
 
+	// Rate limiting middleware
+	rateLimitMiddleware := middlewares.NewRateLimitMiddleware(50)
+
 	// Book routes
 	r.HandleFunc("/api/books", bookHandler.CreateBook).Methods("POST")
 	r.HandleFunc("/api/books", bookHandler.GetAllBooks).Methods("GET")
-	r.HandleFunc("/api/books/{id}", bookHandler.GetBook).Methods("GET")
+	r.Handle("/api/books/{id}", rateLimitMiddleware(http.HandlerFunc(bookHandler.GetBook))).Methods("GET")
 	r.HandleFunc("/api/books/{id}", bookHandler.UpdateBook).Methods("PUT")
 	r.HandleFunc("/api/books/{id}", bookHandler.DeleteBook).Methods("DELETE")
 
