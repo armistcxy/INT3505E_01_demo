@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: book_postgres
+    environment:
+      POSTGRES_USER: bookuser
+      POSTGRES_PASSWORD: bookpass
+      POSTGRES_DB: bookdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookuser -d bookdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - book_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: book_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - book_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book_app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_USER: bookuser
+      DB_PASSWORD: bookpass
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bookdb
+      SERVER_PORT: 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    networks:
+      - book_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  prometheus_data:
+
+networks:
+  book_network:
+    driver: bridge
